@@ -108,6 +108,9 @@ mix run --no-halt
 ## Development
 
 ```bash
+# Format code
+go fmt ./...
+
 # Run unit tests
 go test -v ./...
 
