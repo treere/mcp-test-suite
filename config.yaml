@@ -1,0 +1,75 @@
+server:
+  url: "http://localhost:4000/mcp"
+  timeout: 10s
+
+tests:
+  - name: initialize
+    method: initialize
+    params:
+      protocolVersion: "2025-03-26"
+      capabilities: {}
+      clientInfo:
+        name: "test"
+        version: "1.0.0"
+    expect:
+      serverInfo.name: "Upcase MCP Server"
+    session: false
+
+  - name: initialized_notification
+    method: notifications/initialized
+    expect:
+      http_status: 202
+
+  - name: ping
+    method: ping
+    expect: {}
+
+  - name: tools_list
+    method: tools/list
+    expect:
+      tools[0].name: "analyze_text"
+      tools[1].name: "timeout"
+      tools[2].name: "upcase"
+
+  - name: upcase_tool
+    method: tools/call
+    params:
+      name: upcase
+      arguments:
+        text: "hello world"
+    expect:
+      content[0].text: "HELLO WORLD"
+
+  - name: analyze_text_tool
+    method: tools/call
+    params:
+      name: analyze_text
+      arguments:
+        text: "Hello MCP!"
+    expect:
+      content[0].text_contains: "HELLO MCP"
+
+  - name: prompts_list
+    method: prompts/list
+    expect:
+      prompts[0].name: "text_transform"
+
+  - name: prompts_get
+    method: prompts/get
+    params:
+      name: text_transform
+      arguments:
+        transformation: uppercase
+        text: "sample text"
+    expect:
+      messages[0].role: "user"
+
+  - name: resources_list
+    method: resources/list
+    expect:
+      resources[0].uri: "upcase://examples"
+
+  - name: error_handling
+    method: invalid/method
+    expect:
+      error: true
